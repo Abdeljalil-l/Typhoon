@@ -3,6 +3,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Window 2.0
 import QtGraphicalEffects 1.0
 import QtQuick.XmlListModel 2.0
+import Qt.labs.settings 1.0
 import "utils.js" as Utils
 
 
@@ -10,6 +11,13 @@ Rectangle{
     id : mainRec
     width : Math.round(Screen.width / 1.5)
     height : Math.round(Screen.height / 1.5)
+
+    property string cityName: ""
+    Settings
+    {
+        id : appSettings
+        property string cityNameString: ""
+    }
 
     states :
     [
@@ -26,9 +34,7 @@ Rectangle{
     {
         id : background
         source : "resources/Clouds Bright.jpg"
-
         x : -2000
-
         SequentialAnimation
         {
             running : true
@@ -53,10 +59,25 @@ Rectangle{
         }
     }
 
+
+    Text {
+        id: errorMessage
+        text: ""
+        anchors.centerIn: parent
+        color : "black"
+        font.pixelSize: 30
+
+    }
     XmlListModel
     {
         id : weatherDataModel
-        source : "http://api.openweathermap.org/data/2.5/forecast/daily?q=el-harrouch,dz&mode=xml&units=metric&cnt=5"
+        source : {
+            if (appSettings.cityNameString === "")
+                errorMessage.text = "Oups! There are something wrong here, maybe you missed to choose a city, or try to refresh the data."
+            else
+            source = "http://api.openweathermap.org/data/2.5/forecast/daily?q=" + appSettings.cityNameString + "&mode=xml&units=metric&cnt=5"
+        }
+
         query : "/weatherdata"
 
         /*====================== Metadata ======================*/
@@ -156,8 +177,6 @@ Rectangle{
         XmlRole { name : "FifthDayCloudsValue" ; query : "forecast/time[5]/clouds/@all/string()" }
     }
 
-
-
     ListView
     {
         model : weatherDataModel
@@ -178,6 +197,7 @@ Rectangle{
                     font.pixelSize: 18
                     font.bold: true
                     font.family: bariol.name
+                    color : "#212121"
                 }
 
                 Text
@@ -202,6 +222,7 @@ Rectangle{
                     font.bold: true
                     font.family: bariol.name
                     font.pixelSize: 18
+                    color : "#212121"
                 }
 
                 Text
@@ -211,6 +232,7 @@ Rectangle{
                     id : sunriseText
                     text : Sunrise.slice(11,19)
                     font.pixelSize: 18
+                    color : "#212121"
                 }
             }
 
@@ -224,6 +246,7 @@ Rectangle{
                     font.bold: true
                     font.family: bariol.name
                     font.pixelSize: 18
+                    color : "#212121"
                 }
 
                 Text
@@ -232,20 +255,12 @@ Rectangle{
                     font.family: bariol.name
                     text : Sunset.slice(11,19)
                     font.pixelSize: 18
+                    color : "#212121"
 
                 }
-                Button
-                {
-                    text : "slide"
-                    onClicked:
-                    {
-                        if(mainRec.state === "SLIDED")
-                            mainRec.state = ""
-                        else
-                            mainRec.state = "SLIDED"
-                    }
-                }
+
             }
+
         }
 
         Row
@@ -322,6 +337,7 @@ Rectangle{
                     text: qsTr(FirstDaySymbol)
                     font.pixelSize: 35
                     font.family: bariol.name
+                    color : "#212121"
                 }
 
 
@@ -458,11 +474,16 @@ Rectangle{
             }
         }
 
+        Image {
+            id: horSeperator
+            source: "resources/seperators/hor.png"
+            width : mainRec.width
+
+        }
 
         Row
         {
-            spacing : 100
-            anchors.horizontalCenter: parent.horizontalCenter
+            spacing : 140
             Column
             {
                 id : secondDaySection
@@ -473,10 +494,13 @@ Rectangle{
                     text : Utils.getSecondDayName()
                     font.family: bariol.name
                     font.pixelSize: 20
-                    horizontalAlignment: Text.AlignHCenter
+                    width : parent.width
+                    horizontalAlignment: Text.Center
+                    color : "#212121"
                 }
 
                 Image{
+                    id : secondDayIconImage
                     width : 100
                     height : 83
                     source :
@@ -545,6 +569,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
 
@@ -555,6 +580,7 @@ Rectangle{
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
                     font.pixelSize: 15
+                    color : "#212121"
                 }
 
                 Text
@@ -564,6 +590,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -573,10 +600,10 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
 
                 }
             }
-
 
             Column
             {
@@ -587,7 +614,8 @@ Rectangle{
                     text : Utils.getThirdDayName()
                     font.family: bariol.name
                     font.pixelSize: 20
-                    horizontalAlignment: Text.AlignHCenter
+                    width : parent.width
+                    horizontalAlignment: Text.Center
                 }
                 Image{
                     width : 100
@@ -657,6 +685,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -667,6 +696,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -676,6 +706,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -688,8 +719,6 @@ Rectangle{
                 }
             }
 
-
-
             Column
             {
                 id : fourthDaySection
@@ -699,7 +728,9 @@ Rectangle{
                     text : Utils.getFourthDayName()
                     font.family: bariol.name
                     font.pixelSize: 20
-                    horizontalAlignment: Text.AlignHCenter
+                    width : parent.width
+                    horizontalAlignment: Text.Center
+                    color : "#212121"
                 }
 
                 Image{
@@ -769,6 +800,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -779,6 +811,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -788,6 +821,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -797,10 +831,9 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
             }
-
-
 
             Column
             {
@@ -812,7 +845,9 @@ Rectangle{
                     text : Utils.getFifthDayName()
                     font.family: bariol.name
                     font.pixelSize: 20
-                    horizontalAlignment: Text.AlignHCenter
+                    width : parent.width
+                    horizontalAlignment: Text.Center
+                    color : "#212121"
                 }
                 Image{
                     width : 100
@@ -881,6 +916,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -892,6 +928,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -901,6 +938,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
 
                 Text
@@ -910,6 +948,7 @@ Rectangle{
                     font.family: bariol.name
                     width : parent.width
                     horizontalAlignment: Text.AlignLeft
+                    color : "#212121"
                 }
             }
         }
@@ -917,56 +956,127 @@ Rectangle{
 
     }
 
+Row
+{
+    spacing : 10
+            anchors.right: controlPanel.left
+
+
+            Image
+            {
+                source : "resources/refresh.png"
+                NumberAnimation on rotation
+                {
+                    id : refreshAnimation
+                    from : 0
+                    to : -360
+                    duration : 500
+                    running : false
+                }
+
+                MouseArea
+                {
+                    anchors.fill: parent
+                    onClicked:
+                    {
+                        weatherDataModel.reload()
+                        refreshAnimation.running = true
+                    }
+                }
+            }
+    Image
+    {
+        id : gearSettingsIcon
+        source : "resources/gear.png"
+
+
+        MouseArea
+        {
+            anchors.fill: parent
+            onClicked:
+            {
+                if(mainRec.state === "SLIDED")
+                    mainRec.state = ""
+                else
+                    mainRec.state = "SLIDED"
+            }
+        }
+    }
+
+
+}
 
     Rectangle
 {
+
     id : controlPanel
     anchors.left: mainRec.right
     width : 300
     height : mainRec.height
-    z : 10
-    color : "gray"
+    z : 1
+    Image
+    {
+        anchors.fill: parent
+        source : "resources/fabric_plaid.png"
+        fillMode: Image.TileVertically
+    }
+
     Column
     {
+        x : 30
         Text
         {
             id : controlPanelTitle
             text : "Control panel"
             font.pixelSize: 35
             font.family: bariol.name
-            color : "white"
+            color : "#212121"
             font.bold: true
+            anchors.leftMargin: 10
         }
 
 
         Text
         {
             text : "Choose a city:"
-            color : "white"
+            color : "#212121"
             font.family: bariol.name
             font.pixelSize: 15
         }
-
         Row
         {
 
             TextInput
             {
-                //color : "white"
                 id : cityNameTextInput
-                width : 200
+                width : 150
                 height : 50
-                color: "#ffffff"
+                color : "#212121"
                 cursorVisible: true
                 selectByMouse: true
-
+                Rectangle
+                {
+                    color : "white"
+                    height : 18
+                    width : 150
+                    z : parent.z - 1
+                }
             }
+
             Button
             {
                 text : "OK"
                 onClicked:
                 {
                     weatherDataModel.source = "http://api.openweathermap.org/data/2.5/forecast/daily?q="+cityNameTextInput.text+"&mode=xml&units=metric&cnt=5"
+                    cityName =  cityNameTextInput.text
+                    if(weatherDataModel.errorString() === "")
+                    {
+                        errorMessage.text = ""
+                    }
+
+                    else
+                        errorMessage.text = "Error"
                 }
             }
         }
@@ -974,7 +1084,7 @@ Rectangle{
         Text
         {
             text : "Temperature Unit:"
-            color : "white"
+            color : "#212121"
             font.family: bariol.name
             font.pixelSize: 15
         }
@@ -1023,13 +1133,10 @@ Rectangle{
 
         }
 
-
     }
 }
 
-
+Component.onDestruction: {
+        appSettings.cityNameString = cityName
+    }
 }
-
-
-
-
